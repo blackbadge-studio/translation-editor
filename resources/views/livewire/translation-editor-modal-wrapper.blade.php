@@ -1,8 +1,4 @@
 <!-- Translation Editor Modal Wrapper -->
-<script>
-    console.log('Translation Editor wrapper loaded');
-</script>
-
 @if (auth()->check())
     @php
         $user = auth()->user();
