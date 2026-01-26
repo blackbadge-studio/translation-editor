@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Blackbadgestudio\TranslationEditor\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class TranslationEditorCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'translation-editor';
 
     public $description = 'My command';
 

@@ -1,0 +1,83 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        $authConfig = config('translation-editor.auth', []);
+
+        $modelClass = $authConfig['model'] ?? config('auth.providers.users.model') ?? null;
+        $tableName = $authConfig['table'] ?? null;
+        $columnName = $authConfig['column'] ?? 'locale';
+
+        throw_if(
+            empty($modelClass) && empty($tableName),
+            \Exception::class,
+            'Error: translation editor auth config not loaded. Run [php artisan config:clear] and try again.'
+        );
+
+        if (empty($tableName) && is_string($modelClass) && class_exists($modelClass)) {
+            $model = new $modelClass();
+            $tableName = $model->getTable();
+        }
+
+        if (empty($tableName)) {
+            throw new \Exception('Unable to determine the authenticatable table name for the translation editor migration.');
+        }
+
+        $toggleColumnName = $authConfig['toggle_column'] ?? 'translation_modal_enabled';
+
+        if (! Schema::hasColumn($tableName, $columnName)) {
+            Schema::table($tableName, static function (Blueprint $table) use ($tableName, $columnName) {
+                $table->string($columnName, 10)->nullable();
+            });
+        }
+
+        if (! Schema::hasColumn($tableName, $toggleColumnName)) {
+            Schema::table($tableName, static function (Blueprint $table) use ($tableName, $toggleColumnName) {
+                $table->boolean($toggleColumnName)->default(false)->nullable();
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        $authConfig = config('translation-editor.auth', []);
+
+        $modelClass = $authConfig['model'] ?? config('auth.providers.users.model') ?? null;
+        $tableName = $authConfig['table'] ?? null;
+        $columnName = $authConfig['column'] ?? 'locale';
+
+        if (empty($tableName) && is_string($modelClass) && class_exists($modelClass)) {
+            $model = new $modelClass();
+            $tableName = $model->getTable();
+        }
+
+        $toggleColumnName = $authConfig['toggle_column'] ?? 'translation_modal_enabled';
+
+        if (! empty($tableName)) {
+            if (Schema::hasColumn($tableName, $columnName)) {
+                Schema::table($tableName, static function (Blueprint $table) use ($tableName, $columnName) {
+                    $table->dropColumn($columnName);
+                });
+            }
+
+            if (Schema::hasColumn($tableName, $toggleColumnName)) {
+                Schema::table($tableName, static function (Blueprint $table) use ($tableName, $toggleColumnName) {
+                    $table->dropColumn($toggleColumnName);
+                });
+            }
+        }
+    }
+};
+
