@@ -9,7 +9,6 @@ use Blackbadgestudio\TranslationEditor\Testing\TestsTranslationEditor;
 use Blackbadgestudio\TranslationEditor\TranslationLoaders\TrackingDbLoader;
 use Blackbadgestudio\TranslationEditor\TranslationLoaders\TrackingTranslationLoaderManager;
 use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
@@ -132,7 +131,7 @@ class TranslationEditorServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            Js::make('translation-editor-scripts', __DIR__ . '/../resources/dist/translation-editor.js'),
+            // No JavaScript assets currently needed
         ];
     }
 
