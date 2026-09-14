@@ -9,6 +9,15 @@
 
 A Filament plugin that provides an in-context translation editor. Edit your application translations directly from any Filament page without leaving the interface. The editor appears as a floating modal that tracks translation keys used on the current page, allowing you to edit and save translations on the fly.
 
+## Compatibility
+
+| translation-editor | Filament | Livewire | Laravel | PHP |
+|---|---|---|---|---|
+| 1.1+ | 4.x and 5.x | 3.x and 4.x | 11.28+, 12, 13 | 8.2+ (development needs 8.3+ for Pest 4) |
+| 1.0 | 4.x | 3.x | 11, 12 | 8.2+ |
+
+One release covers both Filament majors: the plugin only uses APIs that are identical in Filament 4 and 5, so upgrading your app to Filament 5 needs no change on this side.
+
 ## Installation
 
 You can install the package via composer:
@@ -18,7 +27,7 @@ composer require blackbadge-studio/translation-editor
 ```
 
 > [!IMPORTANT]
-> If you have not set up a custom theme and are using Filament Panels follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
+> If you have not set up a custom theme and are using Filament Panels follow the instructions in the Filament docs first ([Filament 5](https://filamentphp.com/docs/5.x/styling/overview#creating-a-custom-theme), [Filament 4](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme)).
 
 After setting up a custom theme add the plugin's views to your theme css file or your app's css file if using the standalone packages.
 
@@ -92,15 +101,18 @@ return [
         // The configuration that represents your locales.
         //
         // Supported values:
-        //  - an array of locale codes: ['en', 'fr']
+        //  - an array of locale codes: ['en', 'fr'] (tabs are labelled EN / FR)
         //  - an array with a model configuration:
-        //      ['model' => App\Models\Locale::class, 'column' => 'code']
+        //      ['model' => App\Models\Locale::class, 'column' => 'code', 'label_column' => 'name']
+        //    `label_column` is optional: when set, that column is shown on the
+        //    locale tab instead of the upper-cased code.
         //  - a model class string that has a `key` (or configured) column.
         //
         // Example using a locales table:
         // 'locale' => [
         //     'model' => 'App\\Models\\Locale',
         //     'column' => 'code',
+        //     'label_column' => 'name',
         // ],
         'locale' => [
             'en',

@@ -5,6 +5,9 @@ namespace Blackbadgestudio\TranslationEditor\Livewire;
 use Blackbadgestudio\TranslationEditor\Services\TranslationTracker;
 use Exception;
 use Filament\Notifications\Notification;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -228,55 +231,84 @@ class TranslationEditorModal extends Component
     }
 
     /**
-     * Get the list of locale codes to use.
+     * The locale codes to offer, in the order they should be shown.
      *
-     * Supported configurations for translation-editor.models.locale:
-     *  - array of strings: ['en', 'fr']
-     *  - array with 'model' (and optional 'column'): ['model' => App\Models\Locale::class, 'column' => 'code']
-     *  - string model class: App\Models\Locale::class (uses 'key' column by default)
+     * @return array<int, string>
      */
     protected function getLocaleCodes(): array
+    {
+        return array_keys($this->getLocaleOptions());
+    }
+
+    /**
+     * The locales to offer, keyed by locale code, with the label shown on the tab.
+     *
+     * Supported configurations for translation-editor.models.locale:
+     *  - array of strings: ['en', 'fr'] (labelled with the upper-cased code)
+     *  - array with 'model' (and optional 'column' / 'label_column'):
+     *      ['model' => App\Models\Locale::class, 'column' => 'code', 'label_column' => 'name']
+     *  - string model class: App\Models\Locale::class (uses the 'key' column, no label column)
+     *
+     * @return array<string, string>
+     */
+    public function getLocaleOptions(): array
     {
         $config = config('translation-editor.models.locale');
 
         // Case 1: explicitly configured list of locale codes
         if (is_array($config) && isset($config[0]) && is_string($config[0])) {
-            return array_values(array_filter($config, fn ($value): bool => is_string($value) && $value !== ''));
+            $codes = array_values(array_filter($config, fn ($value): bool => is_string($value) && $value !== ''));
+
+            return array_combine($codes, array_map(strtoupper(...), $codes));
         }
 
-        // Case 2: array with 'model' key and optional 'column'
+        // Case 2: array with 'model' key and optional 'column' / 'label_column'
         if (is_array($config) && isset($config['model'])) {
             $modelClass = $config['model'];
-            $column = $config['column'] ?? 'key';
 
             if (! is_string($modelClass) || $modelClass === '' || ! class_exists($modelClass)) {
                 throw new Exception('Invalid locale model configuration. The `model` class does not exist.');
             }
 
-            /** @var class-string<\Illuminate\Database\Eloquent\Model> $modelClass */
-            return $modelClass::query()
-                ->pluck($column)
-                ->filter(fn ($value): bool => is_string($value) && $value !== '')
-                ->values()
-                ->all();
+            return $this->getLocaleOptionsFromModel(
+                $modelClass,
+                $config['column'] ?? 'key',
+                $config['label_column'] ?? null,
+            );
         }
 
         // Case 3: string model class name, default column 'key'
         if (is_string($config) && $config !== '') {
-            $modelClass = $this->getLocaleModelClass();
-
-            /** @var class-string<\Illuminate\Database\Eloquent\Model> $modelClass */
-            return $modelClass::query()
-                ->pluck('key')
-                ->filter(fn ($value): bool => is_string($value) && $value !== '')
-                ->values()
-                ->all();
+            return $this->getLocaleOptionsFromModel($this->getLocaleModelClass(), 'key', null);
         }
 
         // Fallback: use the application's current locale if nothing is configured
         $fallback = app()->getLocale();
 
-        return $fallback !== '' ? [$fallback] : [];
+        return $fallback !== '' ? [$fallback => strtoupper($fallback)] : [];
+    }
+
+    /**
+     * @param  class-string<Model>  $modelClass
+     * @return array<string, string>
+     */
+    protected function getLocaleOptionsFromModel(string $modelClass, string $codeColumn, ?string $labelColumn): array
+    {
+        $options = [];
+
+        foreach ($modelClass::query()->get() as $locale) {
+            $code = $locale->{$codeColumn};
+
+            if (! is_string($code) || $code === '') {
+                continue;
+            }
+
+            $label = $labelColumn !== null ? $locale->{$labelColumn} : null;
+
+            $options[$code] = (is_string($label) && $label !== '') ? $label : strtoupper($code);
+        }
+
+        return $options;
     }
 
     public function setActiveLocale(string $locale): void
@@ -312,7 +344,7 @@ class TranslationEditorModal extends Component
         }
     }
 
-    public function render(): \Illuminate\Contracts\View\Factory | \Illuminate\Contracts\View\View
+    public function render(): Factory | View
     {
         // Only render if user has translation modal enabled
         $user = Auth::user();

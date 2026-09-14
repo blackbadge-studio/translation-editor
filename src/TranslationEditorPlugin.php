@@ -5,6 +5,7 @@ namespace Blackbadgestudio\TranslationEditor;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 
 class TranslationEditorPlugin implements Plugin
 {
@@ -22,8 +23,8 @@ class TranslationEditorPlugin implements Plugin
     {
         // Register the translation editor modal component to be rendered in the layout
         // Using the body end hook to inject the modal at the end of the page
-        $hookName = class_exists(\Filament\View\PanelsRenderHook::class)
-            ? \Filament\View\PanelsRenderHook::BODY_END
+        $hookName = class_exists(PanelsRenderHook::class)
+            ? PanelsRenderHook::BODY_END
             : 'panels::body.end';
 
         FilamentView::registerRenderHook(

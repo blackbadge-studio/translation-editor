@@ -3,13 +3,14 @@
 namespace Blackbadgestudio\TranslationEditor\TranslationLoaders;
 
 use Blackbadgestudio\TranslationEditor\Services\TranslationTracker;
+use Illuminate\Filesystem\Filesystem;
 use Spatie\TranslationLoader\TranslationLoaderManager;
 
 class TrackingTranslationLoaderManager extends TranslationLoaderManager
 {
     protected TranslationTracker $tracker;
 
-    public function __construct(\Illuminate\Filesystem\Filesystem $app, array | string $files)
+    public function __construct(Filesystem $app, array | string $files)
     {
         parent::__construct($app, $files);
         $this->tracker = app(TranslationTracker::class);

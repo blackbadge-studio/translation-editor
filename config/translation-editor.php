@@ -1,5 +1,8 @@
 <?php
 
+use Blackbadgestudio\TranslationEditor\TranslationLoaders\TrackingDbLoader;
+use Blackbadgestudio\TranslationEditor\TranslationLoaders\TrackingTranslationLoaderManager;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -24,15 +27,18 @@ return [
          * The configuration that represents your locales.
          *
          * Supported values:
-         *  - an array of locale codes: ['en', 'fr']
+         *  - an array of locale codes: ['en', 'fr'] (tabs are labelled EN / FR)
          *  - an array with a model configuration:
-         *      ['model' => App\Models\Locale::class, 'column' => 'code']
+         *      ['model' => App\Models\Locale::class, 'column' => 'code', 'label_column' => 'name']
+         *    `label_column` is optional: when set, that column is shown on the
+         *    locale tab instead of the upper-cased code.
          *  - a model class string that has a `key` (or configured) column.
          */
 
         // 'locale' => [
         //     'model' => 'App\\Models\\Locale',
         //     'column' => 'key',
+        //     'label_column' => 'name',
         // ],
         'locale' => [
             'en',
@@ -56,12 +62,12 @@ return [
         // The translation loaders to register with spatie/laravel-translation-loader.
         // By default we use the tracking DB loader that works with TranslationTracker.
         'translation_loaders' => [
-            \Blackbadgestudio\TranslationEditor\TranslationLoaders\TrackingDbLoader::class,
+            TrackingDbLoader::class,
         ],
 
         // The translation manager class which overrides the default Laravel
         // `translation.loader`.
-        'translation_manager' => \Blackbadgestudio\TranslationEditor\TranslationLoaders\TrackingTranslationLoaderManager::class,
+        'translation_manager' => TrackingTranslationLoaderManager::class,
     ],
 
     /*

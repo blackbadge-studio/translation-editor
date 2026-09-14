@@ -43,7 +43,7 @@
             </div>
 
             @php
-                $locales = $this->getLocaleCodes();
+                $localeOptions = $this->getLocaleOptions();
             @endphp
 
             @if (empty($translationStrings))
@@ -54,7 +54,7 @@
                 </div>
             @else
                 <!-- Locale Tabs - Filament Style -->
-                @if (!empty($locales))
+                @if (!empty($localeOptions))
                     <div class="border-b border-gray-200 dark:border-gray-800 shrink-0 bg-white dark:bg-gray-900">
                         <div class="flex gap-0.5 overflow-x-auto px-4 pt-2"
                             style="scrollbar-width: none; -ms-overflow-style: none;">
@@ -64,13 +64,13 @@
                                 }
                             </style>
                             <div class="flex gap-0.5 translation-tabs">
-                                @foreach ($locales as $localeCode)
+                                @foreach ($localeOptions as $localeCode => $localeLabel)
                                     <button type="button" wire:click="setActiveLocale('{{ $localeCode }}')"
                                         class="group relative flex items-center gap-x-2 overflow-hidden whitespace-nowrap rounded-t-lg px-4 py-2.5 text-sm font-medium transition
                                         {{ $activeLocale === $localeCode
                                             ? 'bg-white dark:bg-gray-900 text-primary-600 dark:text-primary-400'
                                             : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300' }}">
-                                        <span>{{ strtoupper($localeCode) }}</span>
+                                        <span>{{ $localeLabel }}</span>
                                         @if ($activeLocale === $localeCode)
                                             <span
                                                 class="absolute inset-x-0 bottom-0 h-0.5 bg-primary-600 dark:bg-primary-400"></span>
